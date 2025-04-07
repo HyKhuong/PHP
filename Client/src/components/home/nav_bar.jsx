@@ -1,38 +1,17 @@
-import { useEffect, useState } from 'react';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../../assets/image/logo.jpg';
+import { useUser } from '../../contexts/UserContext';
 
 const Navbar = () => {
     const navigate = useNavigate();
-    const [user, setUser] = useState(null);
+    const { user, logout: userLogout } = useUser();
 
-    useEffect(() => {
-        try {
-            const storedUser = localStorage.getItem('user');
-
-            if (storedUser) {
-                try {
-                    const parsedUser = JSON.parse(storedUser);
-                    setUser(parsedUser);
-                    // eslint-disable-next-line no-unused-vars
-                } catch (e) {
-                    setUser(storedUser);
-                }
-            } else {
-                console.log('No user found in localStorage');
-                setUser(null);
-            }
-        } catch (error) {
-            console.log('Error loading user information:', error);
-        }
-    }, []);
-
-    const logout = () => {
-        localStorage.removeItem('user'); // Remove user data
-        console.log('User logged out'); // Debugging
-        window.location.reload(); // Refresh the page or navigate
+    const handleLogout = () => {
+        userLogout();
+        navigate('/');
     };
 
     return (
@@ -114,10 +93,10 @@ const Navbar = () => {
                     ) : (
                         <div className="flex items-center space-x-3">
                             <div className="whitespace-nowrap text-white">
-                                <span>Xin chào, {typeof user === 'string' ? user : user.user_name}</span>
+                                <span>Xin chào, {user.user_name}</span>
                             </div>
                             <button
-                                onClick={logout}
+                                onClick={handleLogout}
                                 className="rounded bg-red-500 px-4 py-2 text-white"
                             >
                                 Logout

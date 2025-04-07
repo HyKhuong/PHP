@@ -11,6 +11,24 @@ const TourDetail = () => {
     const [departureDate, setDepartureDate] = useState('');
     const [guests, setGuests] = useState(1);
     const [tour, setTour] = useState(null);
+    const [loading, setLoading] = useState(true); // Add loading state
+    const [itinerary] = useState([
+        {
+            day: 1,
+            title: "Khởi hành",
+            details: ["Tập trung tại sân bay", "Làm thủ tục check-in", "Khởi hành"]
+        },
+        {
+            day: 2,
+            title: "Khám phá",
+            details: ["Tham quan địa điểm 1", "Ăn trưa", "Tham quan địa điểm 2"]
+        },
+        {
+            day: 3,
+            title: "Kết thúc",
+            details: ["Check-out khách sạn", "Di chuyển ra sân bay", "Về nước"]
+        }
+    ]);
 
     const toggleDay = (day) => {
         setExpandedDay(expandedDay === day ? null : day);
@@ -19,65 +37,35 @@ const TourDetail = () => {
     const { id } = useParams();
 
     useEffect(() => {
-        const fecthTourDetail = async () => {
+        const fetchTourDetail = async () => {
             try {
-                const response = await axios.get(`http://localhost:3000/api/tours/${id}`);
-                console.log('API Response:', response.data);
-                setTour(response.data.data);
+                const response = await axios.get(`http://localhost/PHP/server/public/api/tour/${id}`);
+                console.log('API Response:', response.data.tours);
+                setTour(response.data.tours);
             } catch (error) {
                 console.error('Error fetching tour details:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
-        fecthTourDetail();
+        fetchTourDetail();
     }, [id]);
 
-    const itinerary = [
-        {
-            day: '1-2',
-            title: 'Tokyo – Thành phố không ngủ',
-            details: [
-                'Tháp Tokyo & Shibuya: Ngắm nhìn toàn cảnh thành phố từ tháp Tokyo và check-in tại ngã tư Shibuya sầm uất.',
-                'Akihabara & Harajuku: Khám phá thiên đường công nghệ, anime và thời trang độc đáo.',
-                'Chợ cá Tsukiji: Thưởng thức sushi tươi ngon bậc nhất thế giới.',
-            ],
-        },
-        {
-            day: '3-4',
-            title: 'Kyoto – Hành trình về cố đô',
-            details: [
-                'Chùa Kinkaku-ji (Kim Các Tự): Ngôi chùa dát vàng nổi tiếng giữa thiên nhiên thơ mộng.',
-                'Rừng trúc Arashiyama: Đi dạo giữa rừng trúc xanh mướt, tận hưởng không khí yên bình.',
-                'Gion – Khu phố Geisha: Chiêm ngưỡng nét đẹp cổ kính và văn hóa trà đạo.',
-            ],
-        },
-        {
-            day: '5-6',
-            title: 'Osaka – Thành phố ẩm thực',
-            details: [
-                'Lâu đài Osaka: Một trong những biểu tượng lịch sử quan trọng của Nhật Bản.',
-                'Khu Dotonbori: Thiên đường ẩm thực với takoyaki, okonomiyaki và ramen.',
-                'Universal Studios Japan: Công viên giải trí hàng đầu dành cho tín đồ Harry Potter và các bộ phim Hollywood.',
-            ],
-        },
-        {
-            day: '7',
-            title: 'Núi Phú Sĩ & Làng cổ Hakone',
-            details: [
-                'Ngắm núi Phú Sĩ: Tận hưởng vẻ đẹp hùng vĩ của biểu tượng Nhật Bản.',
-                'Onsen truyền thống: Thư giãn trong suối nước nóng tự nhiên giữa cảnh quan thơ mộng.',
-            ],
-        },
-    ];
+    if (loading) {
+        return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    }
 
-    if (!tour) return <p>Tour not found</p>;
+    if (!tour) {
+        return <div className="flex justify-center items-center min-h-screen">Tour not found</div>;
+    }
 
     return (
         <div>
             <div className="mx-auto max-w-6xl p-4">
                 {/* Header Image Grid */}
                 <img
-                    src={tour.image_url}
+                    src={tour.image_url || 'default-image-url.jpg'} // Add fallback image
                     alt="Tour Image"
                     className="h-auto max-h-[500px] w-full rounded-lg object-cover"
                 />
@@ -136,24 +124,47 @@ const TourDetail = () => {
                 <div className="mt-6">
                     <h2 className="text-xl font-semibold">Lịch trình</h2>
                     <div className="mt-4 grid grid-cols-1 gap-4">
-                        {itinerary.map((item, index) => (
-                            <div
-                                key={index}
-                                className="cursor-pointer rounded-lg border bg-gray-100 p-4 shadow-md"
-                                onClick={() => toggleDay(index)}
-                            >
-                                <h3 className="font-semibold">
-                                    Ngày {item.day}: {item.title}
-                                </h3>
-                                {expandedDay === index && (
-                                    <ul className="mt-2 list-disc pl-4 text-sm text-gray-600">
-                                        {item.details.map((detail, i) => (
-                                            <li key={i}>{detail}</li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </div>
-                        ))}
+                        {tour.itinerary ? (
+                            // Use tour.itinerary if available
+                            JSON.parse(tour.itinerary).map((item, index) => (
+                                <div
+                                    key={index}
+                                    className="cursor-pointer rounded-lg border bg-gray-100 p-4 shadow-md"
+                                    onClick={() => toggleDay(index)}
+                                >
+                                    <h3 className="font-semibold">
+                                        Ngày {item.day}: {item.title}
+                                    </h3>
+                                    {expandedDay === index && (
+                                        <ul className="mt-2 list-disc pl-4 text-sm text-gray-600">
+                                            {item.details.map((detail, i) => (
+                                                <li key={i}>{detail}</li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                            ))
+                        ) : (
+                            // Fallback to default itinerary
+                            itinerary.map((item, index) => (
+                                <div
+                                    key={index}
+                                    className="cursor-pointer rounded-lg border bg-gray-100 p-4 shadow-md"
+                                    onClick={() => toggleDay(index)}
+                                >
+                                    <h3 className="font-semibold">
+                                        Ngày {item.day}: {item.title}
+                                    </h3>
+                                    {expandedDay === index && (
+                                        <ul className="mt-2 list-disc pl-4 text-sm text-gray-600">
+                                            {item.details.map((detail, i) => (
+                                                <li key={i}>{detail}</li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
 

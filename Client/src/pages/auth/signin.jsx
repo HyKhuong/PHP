@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useUser } from '../../contexts/UserContext';
 
 // Import hình ảnh từ thư mục assets
 import logo from '../../assets/image/logo.jpg';
@@ -15,6 +16,7 @@ const Signin = () => {
     });
 
     const navigate = useNavigate();
+    const { updateUser } = useUser();
     const [errors, setErrors] = useState({});
     const [success, setSuccess] = useState('');
 
@@ -26,9 +28,9 @@ const Signin = () => {
 
     // Kiểm tra dữ liệu
     const validate = () => {
-        let newErrors = {};
-        if (!formData.email.includes('@gmail.com')) newErrors.email = 'Email không hợp lệ!';
-        if (formData.password.length < 6) newErrors.password = 'Mật khẩu ít nhất 6 ký tự!';
+        const newErrors = {};
+        if (!formData.email) newErrors.email = 'Email không được để trống';
+        if (!formData.password) newErrors.password = 'Mật khẩu không được để trống';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -36,28 +38,28 @@ const Signin = () => {
     // Xử lý khi submit
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (validate()) {
-            try {
-                const { data } = await axios.post('http://localhost:3000/api/users/signin', formData);
+        if (!validate()) return;
+        try {
+            console.log('Sending login request with:', formData);
+            const response = await axios.post(
+                "http://localhost/PHP/server/public/api/login",
+                formData
+            );
 
-                if (data.user) {
-                    const a = localStorage.setItem('user', JSON.stringify(data.user));
+            console.log('Login response:', response.data);
 
-                    setSuccess('Đăng nhập thành công!');
-                    console.log('Dữ liệu nhận được:', a);
-                    setTimeout(() => {
-                        navigate('/');
-                        window.location.reload();
-                    }, 1000);
-                } else {
-                    setErrors({ general: 'Sai thông tin đăng nhập!' });
-                }
-            } catch (error) {
-                console.error('Lỗi kết nối server', error);
-                setErrors({
-                    general: error.response?.data?.error || 'Lỗi máy chủ! Vui lòng thử lại.',
-                });
+            if (response.data.user) {
+                const userData = response.data.user;
+                localStorage.setItem('user', JSON.stringify(userData));
+                updateUser(userData);
+                setSuccess('Đăng nhập thành công');
+                navigate('/');
             }
+        } catch (error) {
+            console.error('Login error:', error.response?.data);
+            setErrors({
+                general: error.response?.data?.errors?.[0] || "Lỗi kết nối server"
+            });
         }
     };
 

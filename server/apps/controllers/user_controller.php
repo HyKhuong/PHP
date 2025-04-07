@@ -1,10 +1,26 @@
 <?php
-require_once __DIR__ . '/../models/user.php';
+// server/apps/controllers/UserController.php
 
-class UserController {
-    public function index() {
-        $userModel = new User();
-        $users = $userModel->getAllUsers();
-        echo json_encode($users);
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../apps/models/user.php';
+
+class UserController
+{
+    private $pdo;
+    private $userModel;
+
+    public function __construct($pdo)
+    {
+        $this->pdo = $pdo;
+        $this->userModel = new UserModel($pdo);
+    }
+
+    // Hàm lấy tất cả người dùng
+    public function getAllUsers()
+    {
+        $users = $this->userModel->getAllUsers();
+
+        header('Content-Type: application/json');
+        echo json_encode(['users' => $users]);
     }
 }

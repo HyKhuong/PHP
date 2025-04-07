@@ -8,9 +8,9 @@ import axios from 'axios';
 
 const Signup = () => {
     const [formData, setFormData] = useState({
-        name: '',
+        user_name: '',  // Changed from 'name' to match backend
         email: '',
-        password: '',
+        password: ''
     });
 
     const navigate = useNavigate();
@@ -25,43 +25,36 @@ const Signup = () => {
         setFormData({ ...formData, [name]: value });
         setErrors({ ...errors, [name]: '' });
 
-        if (name == 'email') {
+        if (name === 'email') {
             checkEmailExistence(value);
         }
     };
 
     // Hàm kiểm tra email tồn tại
     const checkEmailExistence = async (email) => {
-        if (!email.includes('@gmail.com')) return; // Only check valid emails
-    
-        setIsCheckingEmail(true); // Show loading state
-    
+        if (!email || !email.includes('@')) return; // Basic email validation
+
+        setIsCheckingEmail(true);
         try {
-            const response = await axios.post('http://localhost:3000/api/users/checkemail', { email });
-    
-            console.log("Email check response:", response.data); // Debugging step
-    
-            if (!response.data.success) {
-                setErrors((prev) => ({ ...prev, email: response.data.error }));
-            } else {
-                setErrors((prev) => ({ ...prev, email: "" })); // Clear error if email is available
+            const response = await axios.get(`http://localhost/PHP/server/public/api/check-email/${email}`);
+            if (response.data.exists) {
+                setErrors(prev => ({ ...prev, email: 'Email này đã được đăng ký' }));
             }
         } catch (error) {
-            console.error('Lỗi kết nối server:', error);
+            console.error('Lỗi kiểm tra email:', error);
         } finally {
             setIsCheckingEmail(false);
         }
     };
-    
-    
 
     // Hàm kiểm tra dữ liệu trước khi submit
     const validate = () => {
         let newErrors = {};
-        if (!formData.name) newErrors.name = 'Tên không được để trống!';
-        if (!formData.email.includes('@gmail.com')) newErrors.email = 'Email không hợp lệ!';
+        if (!formData.user_name) newErrors.user_name = 'Tên không được để trống!';
+        if (!formData.email) newErrors.email = 'Email không được để trống!';
+        if (!formData.email.includes('@')) newErrors.email = 'Email không hợp lệ!';
+        if (!formData.password) newErrors.password = 'Mật khẩu không được để trống!';
         if (formData.password.length < 6) newErrors.password = 'Mật khẩu ít nhất 6 ký tự!';
-        if (errors.email) newErrors.email = errors.email; // Nếu email đã tồn tại, không cho đăng ký
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -70,25 +63,23 @@ const Signup = () => {
     // Hàm xử lý khi submit form
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validate()) return;
 
-        if (validate()) {
-            try {
-                const response = await axios.post('http://localhost:3000/api/users/signup', formData);
-                
-                const data = response.data;
-                console.log("data:", data);
-                if (data.success) {
-                    setSuccess(data.message);
+        try {
+            const response = await axios.post(
+                "http://localhost/PHP/server/public/api/register",
+                formData
+            );
 
-                    setTimeout(() => {
-                        navigate('/signin');
-                    }, 1000);
-                } else {
-                    setErrors({ general: data.error });
-                }
-            } catch (error) {
-                console.error('Lỗi kết nối server!', error);
-                setErrors({ general: 'Lỗi kết nối server!' });
+            if (response.data.message) {
+                setSuccess(response.data.message);
+                setTimeout(() => navigate('/signin'), 2000);
+            }
+        } catch (error) {
+            if (error.response?.data?.errors) {
+                setErrors({ general: error.response.data.errors[0] });
+            } else {
+                setErrors({ general: "Lỗi kết nối server" });
             }
         }
     };
@@ -126,12 +117,12 @@ const Signup = () => {
                         <label className="block text-gray-700">Họ và Tên</label>
                         <input
                             type="text"
-                            name="name"
+                            name="user_name"  // Changed from 'name'
                             className="mt-1 w-full rounded border p-2"
-                            value={formData.name}
+                            value={formData.user_name}  // Changed from formData.name
                             onChange={handleChange}
                         />
-                        {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+                        {errors.user_name && <p className="text-sm text-red-500">{errors.user_name}</p>}
                     </div>
 
                     <div className="mb-4">

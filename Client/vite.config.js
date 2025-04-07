@@ -8,6 +8,7 @@ export default defineConfig({
     alias: {
       // eslint-disable-next-line no-undef
       "@": path.resolve(__dirname, "./src"),
+      '/api': 'http://localhost:3000',
     },
   },
 });

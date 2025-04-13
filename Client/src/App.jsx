@@ -14,6 +14,9 @@ import TourCategoryDetail from './pages/category_details/category_details.jsx';
 import PaymentPage from './pages/payment/payment.jsx';
 import PaymentConfirmation from './pages/payment/confirm.jsx';
 import TourList from './pages/location_details/location_details.jsx';
+import TourManagementPage from './pages/admin/tourManagement.jsx';
+import UserMangement from './pages/admin/UserManagement.jsx';
+import BookingManagement from './pages/admin/bookingManagement.jsx';
 
 function App() {
     return (
@@ -93,40 +96,17 @@ function App() {
                                 element={<Dashboard />}
                             />
                             <Route
-                                path="/admin/analytics"
-                                element={<h1 className="title">Analytics</h1>}
+                                path="/admin/tourManagement"
+                                element={<TourManagementPage />}
+                            />
+
+                            <Route
+                                path="/admin/userManagement"
+                                element={<UserMangement />}
                             />
                             <Route
-                                path="/admin/reports"
-                                element={<h1 className="title">Reports</h1>}
-                            />
-                            <Route
-                                path="/admin/customers"
-                                element={<h1 className="title">Customers</h1>}
-                            />
-                            <Route
-                                path="/admin/new-customer"
-                                element={<h1 className="title">New Customer</h1>}
-                            />
-                            <Route
-                                path="/admin/verified-customers"
-                                element={<h1 className="title">Verified Customers</h1>}
-                            />
-                            <Route
-                                path="/admin/products"
-                                element={<h1 className="title">Products</h1>}
-                            />
-                            <Route
-                                path="/admin/new-product"
-                                element={<h1 className="title">New Product</h1>}
-                            />
-                            <Route
-                                path="/admin/inventory"
-                                element={<h1 className="title">Inventory</h1>}
-                            />
-                            <Route
-                                path="/admin/settings"
-                                element={<h1 className="title">Settings</h1>}
+                                path="/admin/bookingManagement"
+                                element={<BookingManagement />}
                             />
                         </Route>
                     </Routes>

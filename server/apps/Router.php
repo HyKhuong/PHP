@@ -4,9 +4,10 @@
 class Router
 {
     private $routes = [
-        'GET'  => [],
-        'POST' => [],
-        // Thêm các phương thức HTTP khác nếu cần
+        'GET'    => [],
+        'POST'   => [],
+        'PUT'    => [],
+        'DELETE' => []
     ];
 
     public function get($path, $callback)
@@ -17,6 +18,16 @@ class Router
     public function post($path, $callback)
     {
         $this->routes['POST'][$path] = $callback;
+    }
+
+    public function put($path, $callback)
+    {
+        $this->routes['PUT'][$path] = $callback;
+    }
+
+    public function delete($path, $callback)
+    {
+        $this->routes['DELETE'][$path] = $callback;
     }
 
     private function matchRoute($routePath, $requestPath)
@@ -44,12 +55,25 @@ class Router
     public function run()
     {
         $method = $_SERVER['REQUEST_METHOD'];
+        // Handle PUT and DELETE requests from forms/AJAX
+        if ($method === 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD'])) {
+            if ($_SERVER['HTTP_X_HTTP_METHOD'] === 'PUT' || $_SERVER['HTTP_X_HTTP_METHOD'] === 'DELETE') {
+                $method = $_SERVER['HTTP_X_HTTP_METHOD'];
+            }
+        }
+
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $basePath = '/PHP/server/public';
         $route = trim(str_replace($basePath, '', $uri), "/ \n\r\t");
 
         error_log("DEBUG: Method - " . $method);
         error_log("DEBUG: Route - " . $route);
+
+        if (!isset($this->routes[$method])) {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method not allowed']);
+            return;
+        }
 
         foreach ($this->routes[$method] as $path => $callback) {
             $params = $this->matchRoute($path, $route);

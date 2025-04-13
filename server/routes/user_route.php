@@ -24,3 +24,8 @@ $router->get('api/users', function () {
     $userController = new UserController($GLOBALS['pdo']);
     $userController->getAllUsers();
 });
+
+$router->get('/api/users/:userid', function ($userid) {
+    $userController = new UserController($GLOBALS['pdo']);
+    $userController->getUserById($userid);
+});

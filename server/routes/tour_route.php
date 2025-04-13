@@ -36,3 +36,26 @@ $router->get('/api/tours', function () {
     $tourController = new TourController($GLOBALS['pdo']);
     $tourController->getAllTours();
 });
+
+// Thêm tour mới
+$router->post('/api/tours', function () {
+    $tourController = new TourController($GLOBALS['pdo']);
+    $tourController->createTour();
+});
+
+// Cập nhật tour
+$router->put('/api/tours/:tourid', function ($tourid) {
+    header('Content-Type: application/json');
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: PUT, GET, POST, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type');
+
+    $tourController = new TourController($GLOBALS['pdo']);
+    $tourController->updateTour($tourid);
+});
+
+// Xóa tour
+$router->delete('/api/tours/:tourid', function ($tourid) {
+    $tourController = new TourController($GLOBALS['pdo']);
+    $tourController->deleteTour($tourid);
+});

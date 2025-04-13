@@ -23,4 +23,17 @@ class UserController
         header('Content-Type: application/json');
         echo json_encode(['users' => $users]);
     }
+
+    public function getUserById($userid)
+    {
+        $user = $this->userModel->getUserById($userid);
+
+        header('Content-Type: application/json');
+        if ($user) {
+            echo json_encode(['success' => true, 'user' => $user]);
+        } else {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'message' => 'User not found']);
+        }
+    }
 }

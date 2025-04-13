@@ -1,4 +1,4 @@
-import { ChartColumn, Home, NotepadText, Package, PackagePlus, Settings, ShoppingBag, UserCheck, UserPlus, Users } from "lucide-react";
+import { ChartColumn, Home, NotepadText, Settings, Users } from "lucide-react";
 
 import ProfileImage from "@/assets/image/profile-image.jpg";
 import ProductImage from "@/assets/image/product-image.jpg";
@@ -10,60 +10,27 @@ export const navbarLinks = [
             {
                 label: "Dashboard",
                 icon: Home,
-                path: "/",
+                path: "/admin",
             },
             {
-                label: "Analytics",
+                label: "Tour Management",
                 icon: ChartColumn,
-                path: "/analytics",
+                path: "/admin/tourManagement",
             },
             {
-                label: "Reports",
-                icon: NotepadText,
-                path: "/reports",
-            },
-        ],
-    },
-    {
-        title: "Customers",
-        links: [
-            {
-                label: "Customers",
+                label: "User Management",
                 icon: Users,
-                path: "/customers",
+                path: "/admin/userManagement",
             },
             {
-                label: "New customer",
-                icon: UserPlus,
-                path: "/new-customer",
+                label: "Booking Management",
+                icon: NotepadText,
+                path: "/admin/bookingManagement",
             },
-            {
-                label: "Verified customers",
-                icon: UserCheck,
-                path: "/verified-customers",
-            },
+
         ],
     },
-    {
-        title: "Products",
-        links: [
-            {
-                label: "Products",
-                icon: Package,
-                path: "/products",
-            },
-            {
-                label: "New product",
-                icon: PackagePlus,
-                path: "/new-product",
-            },
-            {
-                label: "Inventory",
-                icon: ShoppingBag,
-                path: "/inventory",
-            },
-        ],
-    },
+
     {
         title: "Settings",
         links: [

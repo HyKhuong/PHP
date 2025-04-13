@@ -34,6 +34,19 @@ class UserModel
             return false;
         }
     }
+
+    public function getUserById($userid)
+    {
+        try {
+            $stmt = $this->pdo->prepare("SELECT user_id, user_name, email FROM users WHERE user_id = ?");
+            $stmt->execute([$userid]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("DEBUG: Database error in getUserById - " . $e->getMessage());
+            return false;
+        }
+    }
+
     public function getAllUsers()
     {
         $sql = "SELECT * FROM users";

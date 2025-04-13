@@ -61,4 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // ==============================
 require_once __DIR__ . '/../routes/user_route.php';
 require_once __DIR__ . '/../routes/tour_route.php';
+require_once __DIR__ . '/../routes/booking_route.php';
+require_once __DIR__ . '/../routes/location_route.php';
+require_once __DIR__ . '/../routes/category_route.php';
 $router->run();

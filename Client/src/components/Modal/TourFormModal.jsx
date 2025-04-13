@@ -5,6 +5,9 @@ const TourFormModal = ({ isOpen, onClose, formData, onSubmit, onChange, isUpdati
 
     if (!isOpen) return null;
 
+    const today = new Date().toISOString().split('T')[0];
+    const twoWeeksFromToday = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-55 flex items-center justify-center p-4">
             {/* Container Modal */}
@@ -94,9 +97,11 @@ const TourFormModal = ({ isOpen, onClose, formData, onSubmit, onChange, isUpdati
                                 name="start_date"
                                 value={formData.start_date}
                                 onChange={onChange}
+                                min={today}
                                 className="w-full p-2 border rounded"
                                 required
                             />
+                            <span className="text-sm text-gray-500">Từ ngày hôm nay trở đi</span>
                         </div>
 
                         {/* Ngày kết thúc */}
@@ -107,9 +112,12 @@ const TourFormModal = ({ isOpen, onClose, formData, onSubmit, onChange, isUpdati
                                 name="end_date"
                                 value={formData.end_date}
                                 onChange={onChange}
+                                min={formData.start_date || today}
+                                max={twoWeeksFromToday}
                                 className="w-full p-2 border rounded"
                                 required
                             />
+                            <span className="text-sm text-gray-500">Tối đa 2 tuần từ ngày hôm nay</span>
                         </div>
 
                         {/* Trạng thái hoạt động của tour */}

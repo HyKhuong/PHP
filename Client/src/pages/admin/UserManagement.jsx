@@ -8,11 +8,13 @@ const UserManagement = () => {
     const [error, setError] = useState("");
     const [editUser, setEditUser] = useState(null);
 
+    const API_URL = 'http://localhost/PHP/server/public';
+
     useEffect(() => {
         const fetchUsers = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get('http://localhost/PHP/server/public/api/users');
+                const response = await axios.get(`${API_URL}/api/users`);
                 console.log('Raw API Response:', response.data);
 
                 if (response.data && Array.isArray(response.data.users)) {
@@ -33,17 +35,19 @@ const UserManagement = () => {
 
     const handleDelete = async (userId) => {
         try {
-            if (window.confirm("Bạn có chắc chắn muốn xóa user này?")) {
-                const response = await axios.delete(`http://localhost:3000/api/users/${userId}`);
+            if (window.confirm("Bạn có chắc chắn muốn xóa người dùng này?")) {
+                const response = await axios.delete(`${API_URL}/api/users/${userId}`);
                 if (response.data.success) {
                     setUsers(prev => prev.filter(user => user.user_id !== userId));
-                    alert("Xóa user thành công");
+                    alert("Xóa người dùng thành công");
                 }
             }
-        } catch (err) {
-            alert("Xóa không thành công: " + err.message);
+        } catch (error) {
+            console.error('Delete error:', error);
+            alert("Lỗi khi xóa: " + (error.response?.data?.message || error.message));
         }
     };
+
     const handleEditClick = (user) => {
         setEditUser(user);
     };
@@ -54,17 +58,24 @@ const UserManagement = () => {
 
     const handleSaveEdit = async () => {
         try {
-            const response = await axios.put(`http://localhost:3000/api/users/${editUser.user_id}`, {
+            const response = await axios.put(`${API_URL}/api/users/${editUser.user_id}`, {
                 user_name: editUser.user_name,
-                email: editUser.email,
+                email: editUser.email
             });
+
             if (response.data.success) {
-                alert("Cập nhật thành công!");
-                setUsers(users.map(u => u.user_id === editUser.user_id ? response.data.data : u));
+                // Cập nhật state với dữ liệu mới
+                setUsers(prevUsers =>
+                    prevUsers.map(user =>
+                        user.user_id === editUser.user_id ? response.data.data : user
+                    )
+                );
                 setEditUser(null);
+                alert("Cập nhật thông tin thành công!");
             }
-        } catch (err) {
-            alert("Cập nhật không thành công: " + err.message);
+        } catch (error) {
+            console.error('Update error:', error);
+            alert("Lỗi khi cập nhật: " + (error.response?.data?.message || error.message));
         }
     };
 

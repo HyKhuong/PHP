@@ -54,4 +54,41 @@ class UserModel
         $stmt->execute();
         return $stmt->fetchAll();
     }
+
+    public function updateUser($userId, $data)
+    {
+        try {
+            $sql = "UPDATE users 
+                    SET user_name = ?, email = ?
+                    WHERE user_id = ?";
+
+            $stmt = $this->pdo->prepare($sql);
+            return $stmt->execute([
+                $data['user_name'],
+                $data['email'],
+                $userId
+            ]);
+        } catch (PDOException $e) {
+            error_log("Error updating user: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function deleteUser($userId)
+    {
+        try {
+            // First delete related records in bookings table
+            $sql = "DELETE FROM bookings WHERE user_id = ?";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$userId]);
+
+            // Then delete the user
+            $sql = "DELETE FROM users WHERE user_id = ?";
+            $stmt = $this->pdo->prepare($sql);
+            return $stmt->execute([$userId]);
+        } catch (PDOException $e) {
+            error_log("Error deleting user: " . $e->getMessage());
+            return false;
+        }
+    }
 }

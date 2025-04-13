@@ -4,6 +4,10 @@ const EditTourModal = ({ isOpen, onClose, formData, onSubmit, onChange, isUpdati
     // Không hiển thị modal nếu isOpen là false
     if (!isOpen) return null;
 
+    // Tính toán ngày tối thiểu và tối đa
+    const today = new Date().toISOString().split('T')[0];
+    const twoWeeksFromToday = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
     return (
         // Overlay nền đen mờ
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
@@ -91,9 +95,11 @@ const EditTourModal = ({ isOpen, onClose, formData, onSubmit, onChange, isUpdati
                                 name="start_date"
                                 value={formData.start_date}
                                 onChange={onChange}
+                                min={today} // Không cho chọn ngày trong quá khứ
                                 className="w-full p-2 border rounded"
                                 required
                             />
+
                         </div>
 
                         <div className="space-y-2">
@@ -103,9 +109,12 @@ const EditTourModal = ({ isOpen, onClose, formData, onSubmit, onChange, isUpdati
                                 name="end_date"
                                 value={formData.end_date}
                                 onChange={onChange}
+                                min={formData.start_date || today} // Không cho chọn ngày trước ngày bắt đầu
+                                max={twoWeeksFromToday} // Giới hạn tối đa 2 tuần
                                 className="w-full p-2 border rounded"
                                 required
                             />
+
                         </div>
 
                         <div className="space-y-2">

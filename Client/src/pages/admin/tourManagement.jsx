@@ -97,7 +97,13 @@ const TourManagementPage = () => {
         {
             Header: 'Giá',
             accessor: 'price',
-            Cell: ({ value }) => `$${value}` // Hiển thị giá có ký hiệu $
+            Cell: ({ value }) => {
+                // Format giá tiền theo định dạng VND
+                return new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(value)
+            }
         },
         {
             Header: 'Loại tour',
@@ -216,29 +222,45 @@ const TourManagementPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            setIsUpdating(true);  // Bắt đầu hiển thị trạng thái cập nhật
+            setIsUpdating(true);
             const response = await axios.put(
                 `${API_URL}/api/tours/${selectedTour?.tour_id}`,
                 formData
             );
 
             if (response.data.success) {
-                setIsEditModalOpen(false);
-                // Tạo hiệu ứng loading ngắn trước khi làm mới dữ liệu
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                // Cập nhật state tours và filteredData trực tiếp
+                const updatedTour = {
+                    ...selectedTour,
+                    ...formData,
+                    tour_id: selectedTour.tour_id
+                };
 
-                const refreshResponse = await axios.get(`${API_URL}/api/tours`);
-                if (refreshResponse.data.success) {
-                    const toursData = refreshResponse.data.tours;
-                    setTours(toursData);
-                    setFilteredData(toursData);
-                }
+                setTours(prevTours =>
+                    prevTours.map(tour =>
+                        tour.tour_id === selectedTour.tour_id ? updatedTour : tour
+                    )
+                );
+
+                setFilteredData(prevFiltered =>
+                    prevFiltered.map(tour =>
+                        tour.tour_id === selectedTour.tour_id ? updatedTour : tour
+                    )
+                );
+
+                // Đóng modal và reset form
+                setIsEditModalOpen(false);
+                setFormData(defaultFormData);
+                setSelectedTour(null);
+
+                // Hiển thị thông báo thành công
+                alert('Cập nhật tour thành công!');
             }
         } catch (error) {
             console.error('Update error:', error);
             alert(`Lỗi: ${error.response?.data?.message || error.message}`);
         } finally {
-            setIsUpdating(false);  // Tắt loading sau khi hoàn thành
+            setIsUpdating(false);
         }
     };
 
@@ -269,7 +291,6 @@ const TourManagementPage = () => {
         try {
             setIsUpdating(true);
 
-            // Kiểm tra dữ liệu bắt buộc trước khi gửi
             if (!formData.title || !formData.price || !formData.location_id) {
                 throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc");
             }
@@ -277,21 +298,18 @@ const TourManagementPage = () => {
             const response = await axios.post(`${API_URL}/api/tours`, formData);
 
             if (response.data.success) {
+                // Thêm tour mới vào đầu danh sách
+                const newTour = {
+                    ...formData,
+                    tour_id: response.data.tour_id // Giả sử API trả về ID của tour mới
+                };
+
+                setTours(prevTours => [newTour, ...prevTours]);
+                setFilteredData(prevFiltered => [newTour, ...prevFiltered]);
+
                 setIsAddModalOpen(false);
-                // Hiệu ứng loading ngắn để làm mới dữ liệu
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                // Làm mới danh sách tour
-                const refreshResponse = await axios.get(`${API_URL}/api/tours`);
-                if (refreshResponse.data.success) {
-                    const toursData = refreshResponse.data.tours;
-                    setTours(toursData);
-                    setFilteredData(toursData);
-                }
-                alert('Thêm tour mới thành công!');
-
-                // Reset lại dữ liệu form
                 setFormData(defaultFormData);
+                alert('Thêm tour mới thành công!');
             }
         } catch (error) {
             console.error('Add new tour error:', error);

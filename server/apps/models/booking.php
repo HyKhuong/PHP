@@ -38,4 +38,16 @@ class BookingModel
             return false;
         }
     }
+
+    public function updateBookingStatus($bookingId, $status)
+    {
+        try {
+            $sql = "UPDATE bookings SET status = ? WHERE booking_id = ?";
+            $stmt = $this->pdo->prepare($sql);
+            return $stmt->execute([$status, $bookingId]);
+        } catch (PDOException $e) {
+            error_log("Error updating booking status: " . $e->getMessage());
+            return false;
+        }
+    }
 }

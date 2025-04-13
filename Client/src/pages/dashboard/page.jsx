@@ -4,11 +4,9 @@ import axios from "axios";
 
 import { useTheme } from "@/hooks/use-theme";
 
-import { overviewData } from "@/constants";
-
 import { Footer } from "../../components/dashboard/footer";
 
-import { CreditCard, DollarSign, Package, PencilLine, Star, Trash, TrendingUp, Users } from "lucide-react";
+import { CreditCard, DollarSign, Package, Users } from "lucide-react";
 
 const DashboardPage = () => {
     const { theme } = useTheme();
@@ -211,7 +209,10 @@ const DashboardPage = () => {
                     </div>
                     <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
                         <p className="text-3xl font-bold text-slate-900 transition-colors dark:text-slate-50">
-                            ${stats.totalRevenue.toLocaleString()}
+                            {new Intl.NumberFormat('vi-VN', {
+                                style: 'currency',
+                                currency: 'VND'
+                            }).format(stats.totalRevenue)}
                         </p>
                     </div>
                 </div>
@@ -244,7 +245,7 @@ const DashboardPage = () => {
                                 <YAxis
                                     yAxisId="left"
                                     stroke={theme === "light" ? "#475569" : "#94a3b8"}
-                                    tickFormatter={(value) => `$${value.toLocaleString()}`}
+                                    tickFormatter={(value) => `${value.toLocaleString()} VND`}
                                 />
                                 <YAxis
                                     yAxisId="right"
@@ -254,7 +255,7 @@ const DashboardPage = () => {
                                 />
                                 <Tooltip
                                     formatter={(value, name) => {
-                                        if (name === 'total') return [`$${value.toLocaleString()}`, 'Doanh thu'];
+                                        if (name === 'total') return [`${value.toLocaleString()} VND`, 'Doanh thu'];
                                         return [`${value} đơn`, 'Số đơn'];
                                     }}
                                 />
@@ -308,7 +309,10 @@ const DashboardPage = () => {
                                     </div>
                                 </div>
                                 <p className="font-medium text-slate-900 dark:text-slate-50">
-                                    ${booking.total_price.toLocaleString()}
+                                    {new Intl.NumberFormat('vi-VN', {
+                                        style: 'currency',
+                                        currency: 'VND'
+                                    }).format(booking.total_price)}
                                 </p>
                             </div>
                         ))}
@@ -342,13 +346,19 @@ const DashboardPage = () => {
                                                 <p className="text-sm text-gray-500">{tour.description}</p>
                                             </div>
                                         </td>
-                                        <td className="table-cell">${tour.price.toLocaleString()}</td>
+                                        <td className="table-cell">{new Intl.NumberFormat('vi-VN', {
+                                            style: 'currency',
+                                            currency: 'VND'
+                                        }).format(tour.price)}</td>
                                         <td className="table-cell">
                                             <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
                                                 {tour.bookingCount} lượt
                                             </span>
                                         </td>
-                                        <td className="table-cell">${tour.revenue.toLocaleString()}</td>
+                                        <td className="table-cell">{new Intl.NumberFormat('vi-VN', {
+                                            style: 'currency',
+                                            currency: 'VND'
+                                        }).format(tour.revenue)}</td>
                                         <td className="table-cell">
                                             <span className={`px-2 py-1 rounded-full ${tour.status === 'Active'
                                                 ? 'bg-green-100 text-green-800'

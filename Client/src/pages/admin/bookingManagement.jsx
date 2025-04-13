@@ -29,7 +29,6 @@ const BookingManagement = () => {
                                 const userName = userResponse.data.user?.user_name;
                                 const tourTitle = tourResponse.data.tours?.title;
 
-
                                 if (!userName || !tourTitle) {
                                     throw new Error('Missing user or tour data');
                                 }
@@ -136,7 +135,10 @@ const BookingManagement = () => {
                                         : column.accessor === 'booking_date'
                                             ? new Date(booking[column.accessor]).toLocaleDateString()
                                             : column.accessor === 'total_price'
-                                                ? `${booking[column.accessor].toLocaleString()}đ`
+                                                ? new Intl.NumberFormat('vi-VN', {
+                                                    style: 'currency',
+                                                    currency: 'VND'
+                                                }).format(booking[column.accessor])
                                                 : booking[column.accessor]}
                                 </td>
                             ))}

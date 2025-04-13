@@ -29,3 +29,18 @@ $router->get('/api/users/:userid', function ($userid) {
     $userController = new UserController($GLOBALS['pdo']);
     $userController->getUserById($userid);
 });
+
+$router->put('/api/users/:userid', function ($userid) {
+    header('Content-Type: application/json');
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: PUT, GET, POST, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type');
+
+    $userController = new UserController($GLOBALS['pdo']);
+    $userController->updateUser($userid);
+});
+
+$router->delete('/api/users/:userid', function ($userid) {
+    $userController = new UserController($GLOBALS['pdo']);
+    $userController->deleteUser($userid);
+});

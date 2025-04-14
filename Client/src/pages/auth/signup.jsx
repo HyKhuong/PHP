@@ -73,7 +73,13 @@ const Signup = () => {
 
         if (validate()) {
             try {
-                const response = await axios.post('http://localhost:3000/api/users/signup', formData);
+                const response = await axios.post('http://localhost/server/public/auth/register', formData,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json'  // Important header
+                        }
+                    }
+                );
                 
                 const data = response.data;
                 console.log("data:", data);

@@ -36,30 +36,39 @@ const Signin = () => {
     // Xử lý khi submit
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
         if (validate()) {
             try {
-                const { data } = await axios.post('http://localhost:3000/api/users/signin', formData);
+                const response = await axios.post('http://localhost/server/public/auth/login', formData);
+                const { data } = response;
 
-                if (data.user) {
-                    const a = localStorage.setItem('user', JSON.stringify(data.user));
-
+                console.log("user:", data);
+            
+                if (data?.success && data?.user && data?.token) {  // Check success too
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('token', data.token);
+            
+                    console.log('User data:', data.user);
+                    console.log('JWT Token:', data.token);
+                    
                     setSuccess('Đăng nhập thành công!');
-                    console.log('Dữ liệu nhận được:', a);
+            
                     setTimeout(() => {
                         navigate('/');
                         window.location.reload();
                     }, 1000);
                 } else {
-                    setErrors({ general: 'Sai thông tin đăng nhập!' });
+                    setErrors({ general: data?.message || 'Sai thông tin đăng nhập!' });
                 }
             } catch (error) {
-                console.error('Lỗi kết nối server', error);
+                console.error('Lỗi kết nối server:', error);
                 setErrors({
-                    general: error.response?.data?.error || 'Lỗi máy chủ! Vui lòng thử lại.',
+                    general: error.response?.data?.message || 'Lỗi máy chủ! Vui lòng thử lại.',
                 });
             }
         }
     };
+    
 
     return (
         <div

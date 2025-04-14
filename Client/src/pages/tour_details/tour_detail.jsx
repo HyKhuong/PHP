@@ -1,27 +1,19 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import Spain from '../../assets/image/Spain.jpg';
-import London from '../../assets/image/London.jpg';
-import Greece from '../../assets/image/Greece.jpg';
-import { Clock, Users, Plane, Tag } from 'lucide-react';
+import { useParams, Link } from 'react-router-dom';
+import { Clock, Users, Tag } from 'lucide-react';
 import axios from 'axios';
 
 const TourDetail = () => {
-    const [expandedDay, setExpandedDay] = useState(null);
-    const [departureDate, setDepartureDate] = useState('');
-    const [guests, setGuests] = useState(1);
     const [tour, setTour] = useState(null);
-
-    const toggleDay = (day) => {
-        setExpandedDay(expandedDay === day ? null : day);
-    };
+    const [relatedTours, setRelatedTours] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
 
     const { id } = useParams();
 
     useEffect(() => {
         const fecthTourDetail = async () => {
             try {
-                const response = await axios.get(`http://localhost:3000/api/tours/${id}`);
+                const response = await axios.get(`http://localhost/server/public/tours/${id}`);
                 console.log('API Response:', response.data);
                 setTour(response.data.data);
             } catch (error) {
@@ -32,43 +24,31 @@ const TourDetail = () => {
         fecthTourDetail();
     }, [id]);
 
-    const itinerary = [
-        {
-            day: '1-2',
-            title: 'Tokyo – Thành phố không ngủ',
-            details: [
-                'Tháp Tokyo & Shibuya: Ngắm nhìn toàn cảnh thành phố từ tháp Tokyo và check-in tại ngã tư Shibuya sầm uất.',
-                'Akihabara & Harajuku: Khám phá thiên đường công nghệ, anime và thời trang độc đáo.',
-                'Chợ cá Tsukiji: Thưởng thức sushi tươi ngon bậc nhất thế giới.',
-            ],
-        },
-        {
-            day: '3-4',
-            title: 'Kyoto – Hành trình về cố đô',
-            details: [
-                'Chùa Kinkaku-ji (Kim Các Tự): Ngôi chùa dát vàng nổi tiếng giữa thiên nhiên thơ mộng.',
-                'Rừng trúc Arashiyama: Đi dạo giữa rừng trúc xanh mướt, tận hưởng không khí yên bình.',
-                'Gion – Khu phố Geisha: Chiêm ngưỡng nét đẹp cổ kính và văn hóa trà đạo.',
-            ],
-        },
-        {
-            day: '5-6',
-            title: 'Osaka – Thành phố ẩm thực',
-            details: [
-                'Lâu đài Osaka: Một trong những biểu tượng lịch sử quan trọng của Nhật Bản.',
-                'Khu Dotonbori: Thiên đường ẩm thực với takoyaki, okonomiyaki và ramen.',
-                'Universal Studios Japan: Công viên giải trí hàng đầu dành cho tín đồ Harry Potter và các bộ phim Hollywood.',
-            ],
-        },
-        {
-            day: '7',
-            title: 'Núi Phú Sĩ & Làng cổ Hakone',
-            details: [
-                'Ngắm núi Phú Sĩ: Tận hưởng vẻ đẹp hùng vĩ của biểu tượng Nhật Bản.',
-                'Onsen truyền thống: Thư giãn trong suối nước nóng tự nhiên giữa cảnh quan thơ mộng.',
-            ],
-        },
-    ];
+    useEffect(() => {
+        if (tour?.location_id) {
+            const fetchTourLocation = async () => {
+                try {
+                    const response = await axios.get(`http://localhost/server/public/tours/location/${tour.location_id}/${id}`);
+                    console.log('Location API Response:', response.data);
+                    setRelatedTours(response.data.data);
+                } catch (error) {
+                    console.error('Error fetching tour location:', error);
+                }
+            };
+
+            fetchTourLocation();
+        }
+    }, [tour?.location_id, id]);
+
+    useEffect(() => {
+        if (relatedTours.length < 3) return; // Prevents issues when there are fewer than 3 tours
+
+        const interval = setInterval(() => {
+            setCurrentIndex((prevIndex) => (prevIndex + 1) % Math.ceil(relatedTours.length / 3));
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, [relatedTours]);
 
     if (!tour) return <p>Tour not found</p>;
 
@@ -86,11 +66,11 @@ const TourDetail = () => {
                 <div className="mt-6">
                     <h1 className="text-3xl font-bold">{tour.title}</h1>
                     <p className="mt-2 text-gray-500">Trải nghiệm du lịch Nhật Bản cổ điển</p>
-                    <div className="mt-4 grid grid-cols-4 gap-4 text-center">
+                    <div className="mt-4 grid grid-cols-3 gap-4 text-center">
                         <div className="flex flex-col items-center rounded-lg border p-3">
                             <Clock size={24} />
                             <p className="font-semibold">Thời gian</p>
-                            <p className="text-gray-500">{tour.duration} ngay</p>
+                            <p className="text-gray-500">{tour.duration} ngày</p>
                         </div>
                         <div className="flex flex-col items-center rounded-lg border p-3">
                             <Tag size={24} />
@@ -100,12 +80,7 @@ const TourDetail = () => {
                         <div className="flex flex-col items-center rounded-lg border p-3">
                             <Users size={24} />
                             <p className="font-semibold">Số lượng khách</p>
-                            <p className="text-gray-500">{tour.available !== undefined ? tour.available : 'Not available'}</p>
-                        </div>
-                        <div className="flex flex-col items-center rounded-lg border p-3">
-                            <Plane size={24} />
-                            <p className="font-semibold">Hãng hàng không</p>
-                            <p className="text-gray-500">Vietnam Airlines</p>
+                            <p className="text-gray-500">{tour.available !== undefined ? tour.available : 'Không có sẵn'}</p>
                         </div>
                     </div>
                 </div>
@@ -132,106 +107,63 @@ const TourDetail = () => {
                     </div>
                 </div>
 
-                {/* Itinerary Section */}
-                <div className="mt-6">
-                    <h2 className="text-xl font-semibold">Lịch trình</h2>
-                    <div className="mt-4 grid grid-cols-1 gap-4">
-                        {itinerary.map((item, index) => (
-                            <div
-                                key={index}
-                                className="cursor-pointer rounded-lg border bg-gray-100 p-4 shadow-md"
-                                onClick={() => toggleDay(index)}
-                            >
-                                <h3 className="font-semibold">
-                                    Ngày {item.day}: {item.title}
-                                </h3>
-                                {expandedDay === index && (
-                                    <ul className="mt-2 list-disc pl-4 text-sm text-gray-600">
-                                        {item.details.map((detail, i) => (
-                                            <li key={i}>{detail}</li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
                 {/* Booking Section */}
-                <div className="mt-6 rounded-lg border p-4 shadow-md">
-                    <h2 className="text-xl font-semibold">Đặt Tour Ngay</h2>
-                    <label className="mt-2 block">Ngày khởi hành:</label>
-                    <input
-                        type="date"
-                        className="w-full rounded border p-2"
-                        value={departureDate}
-                        onChange={(e) => setDepartureDate(e.target.value)}
-                    />
-                    <label className="mt-2 block">Số lượng khách:</label>
-                    <input
-                        type="number"
-                        className="w-full rounded border p-2"
-                        value={guests}
-                        min="1"
-                        onChange={(e) => setGuests(e.target.value)}
-                    />
-                    <p className="mt-2 text-2xl font-bold text-green-600">$1,200.00</p>
-                    <button
-                        className="w-full rounded px-4 py-2 font-semibold text-white shadow-md"
+                <div className="mt-6 rounded-lg border bg-white p-6 shadow-md">
+                    <h2 className="mb-4 text-xl font-semibold">Đặt Tour Ngay</h2>
+
+                    {/* Departure Date */}
+                    <div className="mb-4 flex gap-20 font-medium text-gray-700">
+                        <p>Ngày khởi hành: {new Date(tour.start_date).toLocaleDateString('vi-VN')}</p>
+                        <p>Ngày kết thúc: {new Date(tour.end_date).toLocaleDateString('vi-VN')}</p>
+                    </div>
+
+                    <div className="mb-4">
+                        <p className="text-start font-medium text-gray-700">Chỗ cần còn trống: {tour.available}</p>
+                    </div>
+
+                    <p className="mb-4 text-start text-2xl font-bold text-green-600">Giá vé: {Number(tour.price).toLocaleString('vi-VN')}VNĐ</p>
+
+                    <Link
+                        to={`/payment/${tour.tour_id}`}
+                        className="block w-full rounded-md py-3 text-center font-semibold text-white shadow-md transition hover:opacity-90"
                         style={{ background: 'linear-gradient(to right, rgb(137, 165, 199), #AFD7E6)' }}
                     >
                         Đặt Ngay
-                    </button>
+                    </Link>
                 </div>
 
                 {/* Related Tours */}
-                <div className="mt-10">
+                <div className="mx-auto max-w-6xl p-4">
                     <h2 className="text-2xl font-semibold">Các Tour Liên Quan</h2>
-                    <div className="mt-4 grid grid-cols-3 gap-4">
-                        <div className="rounded-lg border p-4 shadow-md">
-                            <img
-                                src={Spain}
-                                alt="Spain"
-                                className="h-40 w-full rounded-lg object-cover"
-                            />
-                            <h3 className="mt-2 font-semibold">Tour Tây Ban Nha</h3>
-                            <p className="text-sm text-gray-500">$900.00</p>
-                            <button
-                                className="w-full rounded px-4 py-2 font-semibold text-white shadow-md"
-                                style={{ background: 'linear-gradient(to right, rgb(137, 165, 199), #AFD7E6)' }}
-                            >
-                                Xem Chi Tiết
-                            </button>
-                        </div>
-                        <div className="rounded-lg border p-4 shadow-md">
-                            <img
-                                src={London}
-                                alt="London"
-                                className="h-40 w-full rounded-lg object-cover"
-                            />
-                            <h3 className="mt-2 font-semibold">Tour London</h3>
-                            <p className="text-sm text-gray-500">$850.00</p>
-                            <button
-                                className="w-full rounded px-4 py-2 font-semibold text-white shadow-md"
-                                style={{ background: 'linear-gradient(to right, rgb(137, 165, 199), #AFD7E6)' }}
-                            >
-                                Xem Chi Tiết
-                            </button>
-                        </div>
-                        <div className="rounded-lg border p-4 shadow-md">
-                            <img
-                                src={Greece}
-                                alt="Greece"
-                                className="h-40 w-full rounded-lg object-cover"
-                            />
-                            <h3 className="mt-2 font-semibold">Tour Hy Lạp</h3>
-                            <p className="text-sm text-gray-500">$1,000.00</p>
-                            <button
-                                className="w-full rounded px-4 py-2 font-semibold text-white shadow-md"
-                                style={{ background: 'linear-gradient(to right, rgb(137, 165, 199), #AFD7E6)' }}
-                            >
-                                Xem Chi Tiết
-                            </button>
+                    <div className="relative mt-4 w-full overflow-hidden">
+                        <div
+                            className="flex transition-transform duration-700 ease-in-out"
+                            style={{ transform: `translateX(-${currentIndex * (100 / 3)}%)` }}
+                        >
+                            {relatedTours.map((relatedTour) => (
+                                <div
+                                    key={relatedTour.tour_id}
+                                    className="w-1/3 flex-shrink-0 p-2"
+                                >
+                                    <div className="rounded-lg border p-4 shadow-md">
+                                        <img
+                                            src={relatedTour.image_url}
+                                            alt={relatedTour.title}
+                                            className="h-40 w-full rounded-lg object-cover"
+                                        />
+                                        <h3 className="mt-2 font-semibold">{relatedTour.title}</h3>
+                                        <p className="text-sm text-gray-500">{Number(relatedTour.price).toLocaleString('vi-VN')} VNĐ</p>
+                                        <Link
+                                            to={`/tour_details/${relatedTour.tour_id}`}
+                                            onClick={() => (window.location.href = `/tour_details/${relatedTour.tour_id}`)}
+                                            className="block w-full rounded-md py-3 text-center font-semibold text-white shadow-md transition hover:opacity-90"
+                                            style={{ background: 'linear-gradient(to right, rgb(137, 165, 199), #AFD7E6)' }}
+                                        >
+                                            Xem Chi Tiết
+                                        </Link>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>

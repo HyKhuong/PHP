@@ -31,13 +31,25 @@ const EditTourModal = ({ isOpen, onClose, formData, onSubmit, onChange, isUpdati
                         <div className="space-y-2">
                             <label>Giá (VND)</label>
                             <input
-                                type="number"
+                                type="text"
                                 name="price"
-                                value={formData.price || 0}
-                                onChange={onChange}
+                                value={formData.price || ''}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    const numValue = Number(value);
+                                    if (!isNaN(value) && numValue >= 0 && numValue <= 100000000) {
+                                        onChange({
+                                            target: {
+                                                name: 'price',
+                                                value: value ? numValue : 0
+                                            }
+                                        });
+                                    }
+                                }}
                                 className="w-full p-2 border rounded"
                                 required
                             />
+                            <span className="text-sm text-gray-500">Tối đa 100.000.000 VND</span>
                         </div>
 
                         <div className="space-y-2">
@@ -79,13 +91,24 @@ const EditTourModal = ({ isOpen, onClose, formData, onSubmit, onChange, isUpdati
                         <div className="space-y-2">
                             <label>Số chỗ trống</label>
                             <input
-                                type="number"
+                                type="text"
                                 name="available"
-                                value={formData.available}
-                                onChange={onChange}
+                                value={formData.available || ''}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (!isNaN(value) && Number(value) >= 0 && Number(value) <= 25) {
+                                        onChange({
+                                            target: {
+                                                name: 'available',
+                                                value: value ? Number(value) : 0
+                                            }
+                                        });
+                                    }
+                                }}
                                 className="w-full p-2 border rounded"
                                 required
                             />
+
                         </div>
 
                         <div className="space-y-2">

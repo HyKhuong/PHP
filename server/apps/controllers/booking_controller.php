@@ -1,13 +1,17 @@
 <?php
 
+require_once __DIR__ . '/../models/booking.php';
+
 use App\Models\BookingModel;
 
 class BookingController
 {
+    private $pdo;
     private $bookingModel;
 
     public function __construct($pdo)
     {
+        $this->pdo = $pdo;
         $this->bookingModel = new BookingModel($pdo);
     }
 
@@ -16,7 +20,12 @@ class BookingController
         try {
             $bookings = $this->bookingModel->getAllBookings();
             header('Content-Type: application/json');
-            echo json_encode(['bookings' => $bookings]);
+            if ($bookings) {
+                echo json_encode(['success' => true, 'bookings' => $bookings]);
+            } else {
+                http_response_code(500);
+                echo json_encode(['success' => false, 'message' => 'Failed to fetch bookings']);
+            }
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
@@ -114,6 +123,7 @@ class BookingController
     {
         try {
             $data = json_decode(file_get_contents("php://input"), true);
+            error_log("Received status update data: " . print_r($data, true));
 
             if (!isset($data['status'])) {
                 http_response_code(400);
@@ -121,7 +131,6 @@ class BookingController
                 return;
             }
 
-            // Validate status
             $validStatuses = ['Pending', 'Confirmed', 'Cancelled'];
             if (!in_array($data['status'], $validStatuses)) {
                 http_response_code(400);
@@ -135,13 +144,15 @@ class BookingController
             if ($result) {
                 echo json_encode([
                     'success' => true,
-                    'message' => 'Booking status updated successfully'
+                    'message' => 'Booking status updated successfully',
+                    'data' => ['status' => $data['status']]
                 ]);
             } else {
                 http_response_code(500);
                 echo json_encode(['success' => false, 'message' => 'Failed to update booking status']);
             }
         } catch (Exception $e) {
+            error_log("Error updating booking status: " . $e->getMessage());
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }

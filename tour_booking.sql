@@ -7,6 +7,7 @@ CREATE TABLE Users (
     user_name VARCHAR(50) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(100) NOT NULL,
+    role VARCHAR(20) DEFAULT 'user',
     phone_number VARCHAR(15) NULL,
     address TEXT,
     dob DATE NULL,

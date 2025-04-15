@@ -1,4 +1,4 @@
-import { ChartColumn, Home, NotepadText, Settings, Users } from "lucide-react";
+import { ChartColumn, Home, NotepadText, LogOut, Users } from "lucide-react";
 
 import ProfileImage from "@/assets/image/profile-image.jpg";
 import ProductImage from "@/assets/image/product-image.jpg";
@@ -10,7 +10,7 @@ export const navbarLinks = [
             {
                 label: "Dashboard",
                 icon: Home,
-                path: "/admin",
+                path: "/admin/dashboard",
             },
             {
                 label: "Tour Management",
@@ -27,17 +27,15 @@ export const navbarLinks = [
                 icon: NotepadText,
                 path: "/admin/bookingManagement",
             },
-
         ],
     },
-
     {
-        title: "Settings",
+        title: "Account",
         links: [
             {
-                label: "Settings",
-                icon: Settings,
-                path: "/settings",
+                label: "Logout",
+                icon: LogOut,
+                path: "/signin",
             },
         ],
     },

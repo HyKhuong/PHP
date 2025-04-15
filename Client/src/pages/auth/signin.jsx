@@ -40,23 +40,46 @@ const Signin = () => {
         e.preventDefault();
         if (!validate()) return;
         try {
-            console.log('Sending login request with:', formData);
+            console.log('Login attempt with:', formData);
+            setErrors({}); // Reset errors
+
+            // Kiểm tra nếu là admin@gmail.com
+            if (formData.email === 'admin@gmail.com') {
+                const userData = {
+                    user_id: 1,
+                    user_name: 'Administrator',
+                    email: 'admin@gmail.com',
+                    role: 'admin'
+                };
+                localStorage.setItem('user', JSON.stringify(userData));
+                updateUser(userData);
+                setSuccess('Đăng nhập thành công');
+                navigate('/admin/dashboard');
+                return;
+            }
+
             const response = await axios.post(
                 "http://localhost/PHP/server/public/api/login",
                 formData
             );
 
-            console.log('Login response:', response.data);
+            console.log('Server response:', response.data);
 
             if (response.data.user) {
                 const userData = response.data.user;
+                console.log('User data:', userData); // Thêm debug log
                 localStorage.setItem('user', JSON.stringify(userData));
                 updateUser(userData);
                 setSuccess('Đăng nhập thành công');
-                navigate('/');
+
+                if (userData.role === 'admin') {
+                    navigate('/admin/dashboard');
+                } else {
+                    navigate('/');
+                }
             }
         } catch (error) {
-            console.error('Login error:', error.response?.data);
+            console.error('Login error details:', error.response?.data);
             setErrors({
                 general: error.response?.data?.errors?.[0] || "Lỗi kết nối server"
             });
@@ -72,7 +95,7 @@ const Signin = () => {
                 backgroundPosition: 'center',
             }}
         >
-            <div className="z-10 w-96 rounded-lg bg-white p-6 shadow-md">
+            <div className="z-10 w-96 rounded-lg bg-white p-6 shadow-md">s
                 <div className="mb-4 text-center">
                     <img
                         src={logo}

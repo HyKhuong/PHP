@@ -107,20 +107,20 @@ const UserManagement = () => {
 
     const columns = [
         {
-            Header: "ID",
-            accessor: "user_id"
+            header: 'Mã người dùng',
+            accessor: 'user_id'
         },
         {
-            Header: "Tên",
-            accessor: "user_name"
+            header: 'Họ và tên',
+            accessor: 'user_name'
         },
         {
-            Header: "Email",
-            accessor: "email"
+            header: 'Email',
+            accessor: 'email'
         },
         {
-            Header: "Hành động",
-            accessor: "user_id",
+            header: 'Thao tác',
+            accessor: 'user_id',
             // eslint-disable-next-line react/prop-types
             Cell: ({ row }) => <ActionCell user={row.original} />
         }
@@ -176,8 +176,8 @@ const UserManagement = () => {
                 <thead>
                     <tr>
                         {columns.map((column) => (
-                            <th key={column.Header} className="border p-2 text-left bg-gray-100">
-                                {column.Header}
+                            <th key={column.header} className="border p-2 text-left bg-gray-100">
+                                {column.header}
                             </th>
                         ))}
                     </tr>
@@ -186,7 +186,7 @@ const UserManagement = () => {
                     {users.map((user) => (
                         <tr key={user.user_id}>
                             {columns.map((column) => (
-                                <td key={column.Header} className="border p-2">
+                                <td key={column.header} className="border p-2">
                                     {column.Cell ? column.Cell({ value: user[column.accessor], row: { original: user } }) : user[column.accessor]}
                                 </td>
                             ))}

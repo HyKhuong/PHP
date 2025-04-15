@@ -5,6 +5,9 @@ const BookingManagement = () => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [filterStatus, setFilterStatus] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [statusHistory] = useState([]);
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -17,15 +20,12 @@ const BookingManagement = () => {
                     const bookingsWithDetails = await Promise.all(
                         response.data.bookings.map(async (booking) => {
                             try {
-                                // Corrected API endpoint URL
                                 const userResponse = await axios.get(`http://localhost/PHP/server/public/api/users/${booking.user_id}`);
                                 console.log('User Response:', userResponse.data);
 
-                                // Fetch tour details
                                 const tourResponse = await axios.get(`http://localhost/PHP/server/public/api/tour/${booking.tour_id}`);
                                 console.log('Tour Response:', tourResponse.data);
 
-                                // Trích xuất dữ liệu từ response
                                 const userName = userResponse.data.user?.user_name;
                                 const tourTitle = tourResponse.data.tours?.title;
 
@@ -66,35 +66,55 @@ const BookingManagement = () => {
 
     const handleStatusChange = async (bookingId, newStatus) => {
         try {
-            const response = await axios.put(`http://localhost/PHP/server/public/api/bookings/${bookingId}/status`, {
-                status: newStatus
-            });
+            console.log('Updating status:', bookingId, newStatus); // Debug log
+
+            const response = await axios.put(
+                `http://localhost/PHP/server/public/api/bookings/${bookingId}/status`,
+                { status: newStatus },
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            console.log('Response:', response.data); // Debug log
 
             if (response.data.success) {
-                setBookings(bookings.map(booking =>
-                    booking.booking_id === bookingId
-                        ? { ...booking, status: newStatus }
-                        : booking
-                ));
+                setBookings(prevBookings =>
+                    prevBookings.map(booking =>
+                        booking.booking_id === bookingId
+                            ? { ...booking, status: newStatus }
+                            : booking
+                    )
+                );
                 alert('Cập nhật trạng thái thành công');
             }
         } catch (error) {
-            console.error("Error updating status:", error);
-            alert("Không thể cập nhật trạng thái: " + (error.response?.data?.message || error.message));
+            console.error('Error updating status:', error);
+            alert('Lỗi khi cập nhật trạng thái: ' +
+                (error.response?.data?.message || error.message));
         }
     };
+
+
+
+    const filteredBookings = bookings.filter(booking => {
+        return (!filterStatus || booking.status === filterStatus) &&
+            (!searchQuery || booking.user_name.toLowerCase().includes(searchQuery.toLowerCase()) || booking.booking_id.toString().includes(searchQuery));
+    });
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
 
     const columns = [
-        { header: 'Booking ID', accessor: 'booking_id' },
+        { header: 'Mã đơn đặt', accessor: 'booking_id' },
         { header: 'Tên khách hàng', accessor: 'user_name' },
         { header: 'Tên Tour', accessor: 'tour_name' },
-        { header: 'Booking Date', accessor: 'booking_date' },
-        { header: 'Number of People', accessor: 'number_of_people' },
-        { header: 'Total Price', accessor: 'total_price' },
-        { header: 'Status', accessor: 'status' },
+        { header: 'Ngày Đặt', accessor: 'booking_date' },
+        { header: 'Số lượng', accessor: 'number_of_people' },
+        { header: 'Tổng Tiền', accessor: 'total_price' },
+        { header: 'Trạng thái', accessor: 'status' },
         {
             header: 'Actions',
             accessor: 'actions',
@@ -115,6 +135,28 @@ const BookingManagement = () => {
     return (
         <div className="p-4">
             <h1 className="text-2xl font-bold mb-4">Quản lý Booking</h1>
+
+            <div className="mb-4">
+                <input
+                    type="text"
+                    placeholder="Tìm kiếm theo mã/tên khách"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="p-2 border rounded mr-2"
+                />
+                <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="p-2 border rounded"
+                >
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+
+            </div>
+
             <table className="min-w-full bg-white border border-gray-300">
                 <thead>
                     <tr>
@@ -126,14 +168,19 @@ const BookingManagement = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {bookings.map((booking) => (
+                    {filteredBookings.map((booking) => (
                         <tr key={booking.booking_id}>
                             {columns.map((column) => (
                                 <td key={`${booking.booking_id}-${column.accessor}`} className="p-2 border-b">
                                     {column.cell
                                         ? column.cell({ booking })
                                         : column.accessor === 'booking_date'
-                                            ? new Date(booking[column.accessor]).toLocaleDateString()
+                                            ? new Date(booking[column.accessor]).toLocaleDateString('vi-VN', {
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: 'numeric',
+
+                                            })
                                             : column.accessor === 'total_price'
                                                 ? new Intl.NumberFormat('vi-VN', {
                                                     style: 'currency',
@@ -146,6 +193,17 @@ const BookingManagement = () => {
                     ))}
                 </tbody>
             </table>
+
+            <div className="mt-4">
+                <h2 className="text-xl font-bold mb-2">Lịch sử thay đổi trạng thái</h2>
+                <ul className="list-disc pl-5">
+                    {statusHistory.map((history, index) => (
+                        <li key={index}>
+                            Booking ID: {history.bookingId}, Trạng thái: {history.newStatus}, Thời gian: {new Date(history.timestamp).toLocaleString()}
+                        </li>
+                    ))}
+                </ul>
+            </div>
         </div>
     );
 };

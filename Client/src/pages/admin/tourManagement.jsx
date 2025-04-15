@@ -130,14 +130,28 @@ const TourManagementPage = () => {
             accessor: 'available', // Số chỗ trống của tour
         },
         {
-            Header: 'Ngày bắt đầu',
+            Header: 'Ngày bắt đầu',
             accessor: 'start_date',
-            Cell: ({ value }) => new Date(value).toLocaleDateString() // Format ngày
+            Cell: ({ value }) => {
+                const date = new Date(value);
+                return date.toLocaleDateString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
         },
         {
-            Header: 'Ngày kết thúc',
+            Header: 'Ngày kết thúc',
             accessor: 'end_date',
-            Cell: ({ value }) => new Date(value).toLocaleDateString() // Format ngày
+            Cell: ({ value }) => {
+                const date = new Date(value);
+                return date.toLocaleDateString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
         },
         {
             Header: 'Trạng thái',
@@ -267,10 +281,17 @@ const TourManagementPage = () => {
     // Cập nhật dữ liệu form khi có thay đổi trên input
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+        let newValue = value;
+
+        // Validate for positive numbers
+        if (name === 'price' || name === 'available') {
+            newValue = Math.max(0, Number(value));
+        }
+
         setFormData(prev => ({
             ...prev,
             [name]: name === 'price' || name === 'available'
-                ? Number(value)
+                ? Number(newValue)
                 : value
         }));
     };
@@ -433,9 +454,37 @@ const TourManagementPage = () => {
 
     // ===== RENDER COMPONENTS =====
     return (
-        <div className="container mx-auto p-4">
-            <FilterPanel onFilterChange={handleFilterChange} />
-            {/* Modal thêm mới Tour */}
+        <div className="min-h-screen bg-gray-50 p-4 lg:p-8">
+            {/* Header Section */}
+            <div className="mb-8">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Quản lý Tour</h1>
+                <p className="text-gray-600 mt-1">Quản lý thông tin và trạng thái các tour du lịch</p>
+            </div>
+
+            {/* Filter và Search Section */}
+            <div className="bg-white rounded-lg shadow p-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <FilterPanel onFilterChange={handleFilterChange} />
+                    <button
+                        onClick={handleAddNew}
+                        className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Thêm tour mới
+                    </button>
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="overflow-x-auto">
+                    <TourTable data={filteredData || []} columns={columns} />
+                </div>
+            </div>
+
+            {/* Modals */}
             <TourFormModal
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
@@ -448,7 +497,6 @@ const TourManagementPage = () => {
                 locations={locations}
                 categories={categories}
             />
-            {/* Modal chỉnh sửa Tour */}
             <EditTourModal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
@@ -460,20 +508,7 @@ const TourManagementPage = () => {
                 onFileChange={handleFileChange}
                 locations={locations}
                 categories={categories}
-
             />
-
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-semibold">Tour Management</h1>
-                <button
-                    onClick={handleAddNew}  // Mở modal thêm mới khi click
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
-                >
-                    Thêm tour mới
-                </button>
-            </div>
-            {/* Hiển thị bảng Tour */}
-            <TourTable data={filteredData || []} columns={columns} />
 
             {/* Hiển thị overlay khi đang cập nhật dữ liệu */}
             {isUpdating && (
@@ -482,7 +517,6 @@ const TourManagementPage = () => {
                 </div>
             )}
         </div>
-
     );
 };
 

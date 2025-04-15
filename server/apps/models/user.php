@@ -26,9 +26,11 @@ class UserModel
     public function getUserByEmail($email)
     {
         try {
-            $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = ?");
+            $stmt = $this->pdo->prepare("SELECT user_id, user_name, email, password, role FROM users WHERE email = ?");
             $stmt->execute([$email]);
-            return $stmt->fetch(PDO::FETCH_ASSOC);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            error_log("DEBUG: User data from DB: " . json_encode($result));
+            return $result;
         } catch (PDOException $e) {
             error_log("DEBUG: Database error in getUserByEmail - " . $e->getMessage());
             return false;

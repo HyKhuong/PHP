@@ -32,13 +32,25 @@ const TourFormModal = ({ isOpen, onClose, formData, onSubmit, onChange, isUpdati
                         <div className="space-y-2">
                             <label>Giá (VND)</label>
                             <input
-                                type="number"
+                                type="text"
                                 name="price"
                                 value={formData.price}
-                                onChange={onChange}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    const numValue = Number(value);
+                                    if (!isNaN(value) && numValue >= 0 && numValue <= 100000000) {
+                                        onChange({
+                                            target: {
+                                                name: 'price',
+                                                value: value ? numValue : 0
+                                            }
+                                        });
+                                    }
+                                }}
                                 className="w-full p-2 border rounded"
                                 required
                             />
+
                         </div>
 
                         {/* Địa điểm (dành cho khóa ngoại hoặc tên địa điểm) */}
@@ -80,13 +92,24 @@ const TourFormModal = ({ isOpen, onClose, formData, onSubmit, onChange, isUpdati
                         <div className="space-y-2">
                             <label>Số chỗ trống</label>
                             <input
-                                type="number"
+                                type="text"
                                 name="available"
                                 value={formData.available}
-                                onChange={onChange}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (!isNaN(value) && Number(value) >= 0 && Number(value) <= 25) {
+                                        onChange({
+                                            target: {
+                                                name: 'available',
+                                                value: value ? Number(value) : 0
+                                            }
+                                        });
+                                    }
+                                }}
                                 className="w-full p-2 border rounded"
                                 required
                             />
+
                         </div>
 
                         {/* Ngày bắt đầu */}
@@ -101,7 +124,7 @@ const TourFormModal = ({ isOpen, onClose, formData, onSubmit, onChange, isUpdati
                                 className="w-full p-2 border rounded"
                                 required
                             />
-                            <span className="text-sm text-gray-500">Từ ngày hôm nay trở đi</span>
+
                         </div>
 
                         {/* Ngày kết thúc */}
@@ -117,7 +140,7 @@ const TourFormModal = ({ isOpen, onClose, formData, onSubmit, onChange, isUpdati
                                 className="w-full p-2 border rounded"
                                 required
                             />
-                            <span className="text-sm text-gray-500">Tối đa 2 tuần từ ngày hôm nay</span>
+
                         </div>
 
                         {/* Trạng thái hoạt động của tour */}

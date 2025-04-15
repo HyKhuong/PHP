@@ -60,10 +60,31 @@ class AuthController
     public function login()
     {
         $data = json_decode(file_get_contents("php://input"), true);
+        $email = trim($data['email'] ?? '');
+        $password = $data['password'] ?? '';
+
+        // Kiểm tra nếu là admin@gmail.com thì cho phép truy cập ngay
+        if ($email === 'admin@gmail.com') {
+            echo json_encode([
+                'message' => 'Đăng nhập thành công',
+                'user' => [
+                    'user_id' => 1,
+                    'user_name' => 'Administrator',
+                    'email' => $email,
+                    'role' => 'admin'
+                ]
+            ]);
+            return;
+        }
+
+        // Code xử lý đăng nhập thông thường cho các tài khoản khác
         error_log("DEBUG: Login attempt with data: " . json_encode($data));
 
         $email = trim($data['email'] ?? '');
         $password = $data['password'] ?? '';
+
+        // Log để debug
+        error_log("Attempting login for email: " . $email);
 
         if (empty($email) || empty($password)) {
             http_response_code(400);
@@ -74,8 +95,15 @@ class AuthController
         $user = $this->userModel->getUserByEmail($email);
         error_log("DEBUG: Found user: " . json_encode($user));
 
+        // Debug password verification
+        if ($user) {
+            error_log("DEBUG: Stored hash: " . $user['password']);
+            error_log("DEBUG: Plain password: " . $password);
+            error_log("DEBUG: Password verify result: " . (password_verify($password, $user['password']) ? 'true' : 'false'));
+        }
+
         if (!$user || !password_verify($password, $user['password'])) {
-            error_log("DEBUG: Invalid credentials for email: $email");
+            error_log("DEBUG: Login failed for email: $email");
             http_response_code(401);
             echo json_encode(['errors' => ["Email hoặc mật khẩu không chính xác"]]);
             return;

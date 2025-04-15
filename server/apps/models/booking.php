@@ -44,7 +44,13 @@ class BookingModel
         try {
             $sql = "UPDATE bookings SET status = ? WHERE booking_id = ?";
             $stmt = $this->pdo->prepare($sql);
-            return $stmt->execute([$status, $bookingId]);
+            $result = $stmt->execute([$status, $bookingId]);
+
+            if ($result) {
+                error_log("Successfully updated booking status for ID: $bookingId to $status");
+                return true;
+            }
+            return false;
         } catch (PDOException $e) {
             error_log("Error updating booking status: " . $e->getMessage());
             return false;

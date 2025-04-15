@@ -1,12 +1,25 @@
 import { forwardRef } from "react";
+import { useLocation } from "react-router-dom";
 import logo from "../../assets/image/logo.jpg";
-import PropTypes from "prop-types"
+import PropTypes from "prop-types";
 import { navbarLinks } from "@/constants";
 import { cn } from "../../utils/cn";
 import { NavLink } from "react-router-dom";
-
+import { useUser } from "../../contexts/UserContext"; // Thêm import useUser
 
 export const Sidebar = forwardRef(({ collapsed }, ref) => {
+    const location = useLocation();
+    const { logout } = useUser(); // Lấy hàm logout từ context
+
+    const isActiveLink = (path) => {
+        return location.pathname === path;
+    };
+
+    const handleClick = (path) => {
+        if (path === '/signin') {
+            logout(); // Gọi hàm logout khi click vào Logout
+        }
+    };
 
     return (
         <aside
@@ -34,20 +47,47 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
                 {navbarLinks.map((navbarLink) => (
                     <nav
                         key={navbarLink.title}
-                        className={cn("sidebar-group", collapsed && "md:items-center")}
+                        className={cn(
+                            "flex flex-col gap-y-1",
+                            collapsed && "md:items-center"
+                        )}
                     >
-                        <p className={cn("sidebar-group-title", collapsed && "md:w-[45px]")}>{navbarLink.title}</p>
+                        <p className={cn(
+                            "text-xs font-semibold uppercase text-slate-600 dark:text-slate-400",
+                            collapsed && "md:w-[45px]"
+                        )}>
+                            {navbarLink.title}
+                        </p>
                         {navbarLink.links.map((link) => (
                             <NavLink
                                 key={link.label}
                                 to={link.path}
-                                className={cn("sidebar-item", collapsed && "md:w-[45px]")}
+                                onClick={() => handleClick(link.path)}
+                                className={({ isActive }) =>
+                                    cn(
+                                        "flex items-center gap-x-3 rounded-lg px-3 py-2 transition-all duration-200 ease-in-out",
+                                        collapsed && "md:w-[45px] md:justify-center md:px-0",
+                                        isActive
+                                            ? "bg-blue-500 text-white shadow-md hover:bg-blue-600"
+                                            : "hover:bg-slate-100 text-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+                                    )
+                                }
                             >
                                 <link.icon
                                     size={22}
-                                    className="flex-shrink-0"
+                                    className={cn(
+                                        "flex-shrink-0 transition-colors",
+                                        isActiveLink(link.path) && "text-white"
+                                    )}
                                 />
-                                {!collapsed && <p className="whitespace-nowrap">{link.label}</p>}
+                                {!collapsed && (
+                                    <span className={cn(
+                                        "whitespace-nowrap transition-colors",
+                                        isActiveLink(link.path) && "font-medium"
+                                    )}>
+                                        {link.label}
+                                    </span>
+                                )}
                             </NavLink>
                         ))}
                     </nav>

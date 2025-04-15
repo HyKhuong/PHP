@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './context/theme_context';
 import { UserProvider } from './contexts/UserContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Layout1 from './pages/dashboard/layout';
 import Layout2 from './pages/layout.jsx';
 import Dashboard from './pages/dashboard/page';
@@ -89,17 +90,20 @@ function App() {
                         {/*Admin */}
                         <Route
                             path="/admin"
-                            element={<Layout1 />}
+                            element={
+                                <ProtectedRoute>
+                                    <Layout1 />
+                                </ProtectedRoute>
+                            }
                         >
                             <Route
-                                index
+                                path="/admin/dashboard"
                                 element={<Dashboard />}
                             />
                             <Route
                                 path="/admin/tourManagement"
                                 element={<TourManagementPage />}
                             />
-
                             <Route
                                 path="/admin/userManagement"
                                 element={<UserMangement />}

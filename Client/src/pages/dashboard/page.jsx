@@ -303,7 +303,11 @@ const DashboardPage = () => {
                                             {booking.tour_name}
                                         </p>
                                         <p className="text-xs text-slate-500">
-                                            {new Date(booking.booking_date).toLocaleDateString()} -
+                                            {new Date(booking.booking_date).toLocaleDateString('vi-VN', {
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: 'numeric'
+                                            })} -
                                             {booking.number_of_people} người
                                         </p>
                                     </div>

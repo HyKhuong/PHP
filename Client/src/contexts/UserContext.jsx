@@ -1,47 +1,51 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 const UserContext = createContext();
 
-// Named export for the hook
-export function useUser() {
-    const context = useContext(UserContext);
-    if (!context) {
-        throw new Error('useUser must be used within a UserProvider');
-    }
-    return context;
-}
-
-// Named export for the provider component
-// eslint-disable-next-line react/prop-types
 export function UserProvider({ children }) {
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState(() => {
+        // Kiểm tra localStorage khi khởi tạo state
+        const savedUser = localStorage.getItem('user');
+        return savedUser ? JSON.parse(savedUser) : null;
+    });
 
-    useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            try {
-                setUser(JSON.parse(storedUser));
-            } catch (error) {
-                console.error('Error parsing user data:', error);
-            }
-        }
-    }, []);
-
-    const value = {
-        user,
-        updateUser: (userData) => {
-            setUser(userData);
+    const updateUser = (userData) => {
+        setUser(userData);
+        if (userData) {
             localStorage.setItem('user', JSON.stringify(userData));
-        },
-        logout: () => {
-            setUser(null);
+        } else {
             localStorage.removeItem('user');
         }
     };
 
+    const logout = () => {
+        localStorage.removeItem('user');
+        setUser(null);
+    };
+
+    // Thêm useEffect để lắng nghe thay đổi của localStorage
+    useEffect(() => {
+        const handleStorageChange = () => {
+            const savedUser = localStorage.getItem('user');
+            setUser(savedUser ? JSON.parse(savedUser) : null);
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, []);
+
     return (
-        <UserContext.Provider value={value}>
+        <UserContext.Provider value={{ user, updateUser, logout }}>
             {children}
         </UserContext.Provider>
     );
 }
+
+UserProvider.propTypes = {
+    children: PropTypes.node.isRequired
+};
+
+export const useUser = () => useContext(UserContext);

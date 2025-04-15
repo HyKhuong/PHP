@@ -111,4 +111,16 @@ VALUES
 ('Tour Hà Giang', 3, 16, 'Trải nghiệm cung đường hùng vĩ của Hà Giang.', 5000000.00, 5, '2025-11-05', '2025-11-10', 14, 'https://th.bing.com/th/id/OIP.UfpyltIahlV-9Pq837LDpgHaEb?rs=1&pid=ImgDetMain', 'Active', NOW()),  
 ('Cung Đường Hạnh Phúc', 3, 16, 'Chinh phục cung đường đẹp nhất Việt Nam.', 4800000.00, 3, '2025-11-11', '2025-11-14', 20, 'https://th.bing.com/th/id/OIP.-0R4pb3XwnkGQLd2PV9FGwHaE7?pid=ImgDet&rs=1', 'Active', NOW()),  
 ('Đèo Mã Pí Lèng', 2, 16, 'Check-in đèo Mã Pí Lèng - một trong tứ đại đỉnh đèo.', 4600000.00, 2, '2025-11-15', '2025-11-17', 25, 'https://th.bing.com/th/id/OIP.sATt3TGQXrC5jb6fcpVJzAHaE8?pid=ImgDet&rs=1', 'Active', NOW()),  
-('Chợ Tình Khâu Vai', 3, 16, 'Khám phá chợ tình độc đáo của người dân tộc vùng cao.', 4500000.00, 1, '2025-11-18', '2025-11-18', 30, 'https://th.bing.com/th/id/OIP.xAt6x37tFHU4d_4B_dF7WQHaE8?pid=ImgDet&rs=1', 'Active', NOW());  
+('Chợ Tình Khâu Vai', 3, 16, 'Khám phá chợ tình độc đáo của người dân tộc vùng cao.', 4500000.00, 1, '2025-11-18', '2025-11-18', 30, 'https://th.bing.com/th/id/OIP.xAt6x37tFHU4d_4B_dF7WQHaE8?pid=ImgDet&rs=1', 'Active', NOW());
+
+-- Xóa admin cũ nếu có
+DELETE FROM users WHERE email = 'admin@gmail.com';
+
+-- Thêm tài khoản admin mới
+INSERT INTO users (user_name, email, password, role) 
+VALUES (
+    'Administrator', 
+    'admin@gmail.com',
+    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', -- hash của "123456"
+    'admin'
+);

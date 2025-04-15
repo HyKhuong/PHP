@@ -48,6 +48,13 @@ class TourController
             return;
         }
 
+        // Validate negative numbers
+        if ($data['price'] < 0 || (isset($data['available']) && $data['available'] < 0)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Giá và số lượng không được là số âm']);
+            return;
+        }
+
         $result = $this->tourModel->createTour($data);
 
         header('Content-Type: application/json');
@@ -68,6 +75,16 @@ class TourController
             if (!is_numeric($tourid)) {
                 http_response_code(400);
                 echo json_encode(['success' => false, 'message' => 'Invalid tour ID']);
+                return;
+            }
+
+            // Validate negative numbers
+            if (
+                isset($data['price']) && $data['price'] < 0 ||
+                isset($data['available']) && $data['available'] < 0
+            ) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Giá và số lượng không được là số âm']);
                 return;
             }
 

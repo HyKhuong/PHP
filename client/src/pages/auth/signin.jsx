@@ -52,11 +52,18 @@ const Signin = () => {
                     console.log('JWT Token:', data.token);
                     
                     setSuccess('Đăng nhập thành công!');
-            
-                    setTimeout(() => {
-                        navigate('/');
-                        window.location.reload();
-                    }, 1000);
+                    if(data?.user.email === 'admin@gmail.com') {
+                        setTimeout(() => {
+                            navigate('/admin/dashboard');
+                            window.location.reload();
+                        }, 1000);
+                    }  
+                    else {
+                        setTimeout(() => {
+                            navigate('/');
+                            window.location.reload();
+                        }, 1000);
+                    }             
                 } else {
                     setErrors({ general: data?.message || 'Sai thông tin đăng nhập!' });
                 }

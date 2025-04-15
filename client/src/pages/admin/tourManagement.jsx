@@ -99,9 +99,9 @@ const TourManagementPage = () => {
             Header: 'Loại tour',
             accessor: 'category_id',
             Cell: ({ value }) => {
-                console.log('Row category_id:', value);
+                
                 const category = categories.find(cate => String(cate.category_id) === String(value));
-                console.log('Matching category:', category);
+                
                 return category ? category.title : 'Unknown Category';
             }
         },
@@ -109,9 +109,9 @@ const TourManagementPage = () => {
             Header: 'Địa điểm',
             accessor: 'location_id', // Sử dụng khóa ngoại location_id
             Cell: ({ value }) => {
-                console.log('Row location_id:', value);
+                
                 const location = locations.find(loc => String(loc.location_id) === String(value));
-                console.log('Matching location:', location);
+                
                 return location ? location.title : 'Unknown Location';
             }
         },
@@ -206,6 +206,7 @@ const TourManagementPage = () => {
                 `http://localhost/server/public/tours/admin/${selectedTour?.tour_id}`,
                 formData
             );
+            console.log("api recive1:", formData);
 
             if (response.data.status) {
                 setIsEditModalOpen(false);
@@ -216,6 +217,7 @@ const TourManagementPage = () => {
                 if (refreshResponse.data.status) {
                     const toursData = refreshResponse.data.data;
                     setTours(toursData);
+                    console.log("api recive2:", toursData);
                     setFilteredData(toursData);
                 }
             }

@@ -1,18 +1,67 @@
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-
 import { useTheme } from "@/hooks/use-theme";
-
 import { overviewData, recentSalesData, topProducts } from "@/constants";
-
 import { Footer } from "../../components/dashboard/footer";
-
-import { CreditCard, DollarSign, Package, PencilLine, Star, Trash, TrendingUp, Users } from "lucide-react";
+import { Package, PencilLine, Star, Trash, Users } from "lucide-react";
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const DashboardPage = () => {
     const { theme } = useTheme();
+    const [totalTours, setTotalTours] = useState(0);
+    const [totalUsers, setTotalUsers] = useState(0);
+    const [activeTours, setActiveTours] = useState(0);
+    const inactiveTours = totalTours - activeTours;
+    useEffect(() => {
+        // Fetch tours and compute statistics
+        axios.get('http://localhost/server/public/tours')
+            .then(response => {
+                if (response.data.status) {
+                    const toursData = response.data.data;
+                    setTotalTours(toursData.length);
+                    const active = toursData.filter(tour => tour.status === 'Active').length;
+                    setActiveTours(active);
+                }
+            })
+            .catch(error => console.error("Error fetching tours:", error));
+
+        // Fetch tours and compute statistics
+        axios.get('http://localhost/server/public/tours')
+            .then(response => {
+                if (response.data.status) {
+                    const toursData = response.data.data;
+                    setTotalTours(toursData.length);
+                    const active = toursData.filter(tour => tour.status === 'Inactive').length;
+                    setActiveTours(active);
+                }
+            })
+            .catch(error => console.error("Error fetching tours:", error));
+        // Fetch tours and count total tours
+        axios.get('http://localhost/server/public/tours')
+            .then(response => {
+                if (response.data.status) {
+                    setTotalTours(response.data.data.length);
+
+                }
+            })
+            .catch(error => console.error("Error fetching tours:", error));
+        // Fetch users and count total users
+        axios.get('http://localhost/server/public/auth/current-user')
+            .then(response => {
+                console.log("User API response:", response.data);
+                // Use "getuser" instead of "data"
+                const users = response.data?.data;
+                if (response.data?.status && Array.isArray(users))
+                    setTotalUsers(users.length);
+            })
+            .catch(error => console.error("Error fetching users:", error));
+    }, []);
 
     return (
+
         <div className="flex flex-col gap-y-4">
+            {/* New statistic cards */}
+
             <h1 className="title">Dashboard</h1>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 <div className="card">
@@ -20,29 +69,23 @@ const DashboardPage = () => {
                         <div className="w-fit rounded-lg bg-blue-500/20 p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                             <Package size={26} />
                         </div>
-                        <p className="card-title">Total Products</p>
+                        <p className="card-title">Total Tours</p>
                     </div>
                     <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
-                        <p className="text-3xl font-bold text-slate-900 transition-colors dark:text-slate-50">25,154</p>
-                        <span className="flex w-fit items-center gap-x-2 rounded-full border border-blue-500 px-2 py-1 font-medium text-blue-500 dark:border-blue-600 dark:text-blue-600">
-                            <TrendingUp size={18} />
-                            25%
-                        </span>
+                        <p className="text-3xl font-bold text-slate-900 transition-colors dark:text-slate-50">{totalTours}</p>
+
                     </div>
                 </div>
                 <div className="card">
                     <div className="card-header">
                         <div className="rounded-lg bg-blue-500/20 p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
-                            <DollarSign size={26} />
+                            <Package size={26} />
                         </div>
-                        <p className="card-title">Total Paid Orders</p>
+                        <p className="card-title">Total Active Tours</p>
                     </div>
                     <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
-                        <p className="text-3xl font-bold text-slate-900 transition-colors dark:text-slate-50">$16,000</p>
-                        <span className="flex w-fit items-center gap-x-2 rounded-full border border-blue-500 px-2 py-1 font-medium text-blue-500 dark:border-blue-600 dark:text-blue-600">
-                            <TrendingUp size={18} />
-                            12%
-                        </span>
+                        <p className="text-3xl font-bold text-slate-900 transition-colors dark:text-slate-50">{inactiveTours}</p>
+
                     </div>
                 </div>
                 <div className="card">
@@ -50,29 +93,25 @@ const DashboardPage = () => {
                         <div className="rounded-lg bg-blue-500/20 p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                             <Users size={26} />
                         </div>
-                        <p className="card-title">Total Customers</p>
+                        <p className="card-title">Total Users</p>
                     </div>
                     <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
-                        <p className="text-3xl font-bold text-slate-900 transition-colors dark:text-slate-50">15,400k</p>
-                        <span className="flex w-fit items-center gap-x-2 rounded-full border border-blue-500 px-2 py-1 font-medium text-blue-500 dark:border-blue-600 dark:text-blue-600">
-                            <TrendingUp size={18} />
-                            15%
-                        </span>
+                        <p className="text-3xl font-bold text-slate-900 transition-colors dark:text-slate-50">
+                            {totalUsers}
+                        </p>
+
                     </div>
                 </div>
                 <div className="card">
                     <div className="card-header">
                         <div className="rounded-lg bg-blue-500/20 p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
-                            <CreditCard size={26} />
+                            <Package size={26} />
                         </div>
-                        <p className="card-title">Sales</p>
+                        <p className="card-title">Total Inactive Tours</p>
                     </div>
                     <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
-                        <p className="text-3xl font-bold text-slate-900 transition-colors dark:text-slate-50">12,340</p>
-                        <span className="flex w-fit items-center gap-x-2 rounded-full border border-blue-500 px-2 py-1 font-medium text-blue-500 dark:border-blue-600 dark:text-blue-600">
-                            <TrendingUp size={18} />
-                            19%
-                        </span>
+                        <p className="text-3xl font-bold text-slate-900 transition-colors dark:text-slate-50">{activeTours}</p>
+
                     </div>
                 </div>
             </div>
